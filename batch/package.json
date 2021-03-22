@@ -1,0 +1,26 @@
+{
+  "name": "git-issue-viewer",
+  "version": "1.0.0",
+  "description": "指定した gitlab リポジトリのissue状況を可視化します。",
+  "main": "index.js",
+  "scripts": {
+    "batch": "tsc && node ./lib/getDataBatch.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bwsunkist/git-issue-viewer.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bwsunkist/git-issue-viewer/issues"
+  },
+  "homepage": "https://github.com/bwsunkist/git-issue-viewer#readme",
+  "dependencies": {
+    "@types/axios": "^0.14.0",
+    "axios": "^0.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.20"
+  }
+}

@@ -1,0 +1,16 @@
+{
+    "USE_GITLAB": true,
+    "ACCESS_TOKEN": "yourToken",
+    "BASE_URL": "https://github.com",
+    "REPO_URL": [
+        "yourOrganization/yourProject"
+    ],
+    "PROJ_ID": [
+        23711341
+    ],
+    "COUNT_TAGS": [
+        "high",
+        "middle",
+        "low"
+    ]
+}
