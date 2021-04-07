@@ -3,7 +3,9 @@
     <v-col cols="12" sm="8" md="6">
       <div class="small">
         <line-chart :chart-data="datacollection" :options="options"></line-chart>
-        <button @click="fillData()">Randomize</button>
+      </div>
+      <div class="small">
+        <bar-chart :chart-data="datacollection2" :options="options2"></bar-chart>
       </div>
       <v-card>
         <v-card-title class="headline">
@@ -81,21 +83,29 @@
 </template>
 
 <script lang="ts">
-import Logo from '~/components/Logo.vue'
-import VuetifyLogo from '~/components/VuetifyLogo.vue'
 import Vue from 'vue';
-import { sampleValue } from '../assets/assets';
 import LineChart from '../plugins/LineChart'
+import BarChart from '../plugins/BarChart'
+import * as util from 'util';
+const fs = require('fs');
+const config = require('../batch/config')
+
+// import * as fs from 'fs';
+// const readFile = util.promisify(fs.readFile);
+import * as result from '../batch/output/result.json';
+// import { readCsvDataSync } from '../store/csvData';
 
 export default Vue.extend({
   mounted () {
-      this.fillData()
+    this.fillData()
+    this.fillData2()
   },
   data() {
     return {
       title: 'aaaaa',
       selectedPjName: 'aaaaabbb',
       datacollection: {},
+      datacollection2: {},
       options: {
         scales: {
             xAxes: [{
@@ -105,35 +115,60 @@ export default Vue.extend({
                 }
             }]
         }
+      },
+      options2: {
+        scales: {
+          yAxes: [{
+              ticks: {
+                  suggestedMin: 50,
+                  suggestedMax: 100
+              }
+          }]
+        }
       }
     }
   },
   methods: {
     fillData () {
       this.datacollection = {
-        labels: [ new Date("2015-3-15 13:3"), new Date("2015-3-19 13:3"), new Date("2015-3-21 13:3") ],
+        labels: [ "2015-03-15",  "2015-03-17",  "2015-03-20" ],
+        datasets: [
+          {
+            label: 'Data One',
+            lineTension: 0,
+            backgroundColor: '#f87979',
+            data: [ this.getRandomInt(), 10, 40 ]
+          },
+          {
+            label: 'Data two',
+            lineTension: 0,
+            backgroundColor: '#f82970',
+            data: [ this.getRandomInt(), 20, 60 ]
+          }
+        ]
+      }
+      this.datacollection2 = {
+        labels: ['January', 'February'],
         datasets: [
           {
             label: 'Data One',
             backgroundColor: '#f87979',
-            data: [ this.getRandomInt(), 10, 60 ]
-          },
-          {
-            label: 'Data two',
-            backgroundColor: '#f82970',
-            data: [ this.getRandomInt(), 20, 40 ]
+            data: [40, 20]
           }
         ]
       }
     },
+    fillData2 () {
+      const data = (result as any)['all_chart']
+      this.datacollection = data
+    },
     getRandomInt () {
       return Math.floor(Math.random() * (50 - 5 + 1)) + 5
-    }
+    },
   }, 
   components: {
-    Logo,
-    VuetifyLogo,
-    LineChart
+    LineChart,
+    BarChart
   }
 })
 </script>

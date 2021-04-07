@@ -1,5 +1,5 @@
-import axios from 'axios';
-import * as fs from 'fs';
+import axios, { AxiosRequestConfig } from 'axios';
+import * as fs from 'fs'
 const config = require('../config')
 
 const axiosInst = axios.create({ 
@@ -12,36 +12,39 @@ const axiosInst = axios.create({
 }) 
 
 const result = {}
+const pjArray: Array<string> = config.PROJ_ID;
 const tagArray: Array<string> = config.COUNT_TAGS;
 
-tagArray.forEach(tag => {
-  axiosInst.get(`/${config.PROJ_ID}/issues?labels=${tag}&per_page=50&scope=all`)
-  .then(function (response) {
-    console.log('---', tag, '---')
-    const issuesArr: Array<any> = response.data;
-    // console.log(issuesArr.length)
-    issuesArr.forEach(issue => {
-      const res = {
-        created_at: issue.created_at,
-        labels: issue.labels[0],
-        state: issue.state
+pjArray.forEach(pjId => {
+  tagArray.forEach(tag => {
+    const axiosConf: AxiosRequestConfig = {
+      params: {
+        labels: tag,
+        per_page: 50,
+        scope: 'all',
       }
-      console.log(res);      
-    });
-  })
-  .catch(function (error) {
-    console.log(error);
-  })
+    }
+    axiosInst.get(`/${pjId}/issues`, axiosConf)
+    .then(function (response) {
+      const issuesArr: Array<any> = response.data;
+      issuesArr.forEach(issue => {
+        const res = {
+          created_at: issue.created_at,
+          labels: issue.labels[0],
+          state: issue.state
+        }
+      });
+      const result = { issuesArr }
+      const resultJson = JSON.stringify(result)
+      const repoName = `${pjId}_${tag}.json`
+      fs.writeFileSync(`${__dirname}/../output/${repoName}`, resultJson)
+      console.log('tag:', tag)
+      console.log('issuesNum:', issuesArr.length)
+    })
+    .catch(function (error) {
+      console.log(error);
+    })
+  });
 });
 
 
-// const datesample = new Date('2021-01-16T14:47:22.393Z')
-// console.log(datesample.getFullYear())
-// console.log(datesample.getMonth() + 1)
-// console.log(datesample.getDate())
-// const date = new Date(datesample.getFullYear(), datesample.getMonth(), datesample.getDate())
-// console.log(date.toDateString())
-// const b = date.toDateString();
-// const a = []
-// a.push({ [b]: 1 })
-// console.log(a)
