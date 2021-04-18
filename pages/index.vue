@@ -109,6 +109,16 @@ export default Vue.extend({
             data: [5, 6]
           }
         ]
+      },
+      options2: {
+        scales: {
+          yAxes: [{
+              ticks: {
+                  suggestedMin: 50,
+                  suggestedMax: 100
+              }
+          }]
+        }
       }
     }
   },

@@ -62,12 +62,10 @@ pjArray.forEach(pjId => {
   });
 });
 
-// console.log('all open',  allDateOpenIssues)
-// console.log('all close', allDateCloseIssues)
 result[`open_all`]   = allDateOpenIssues
 result[`close_all`] = allDateCloseIssues
 
-// date closs check 本当はforeachの中で実施必要
+// 片方にだけ存在する日付がないように０埋め
 if (Object.keys(result['open_all']) !== Object.keys(result['close_all'])) {
   const openKeys  = Object.keys(result['open_all'])
   const closeKeys = Object.keys(result['close_all'])
@@ -82,10 +80,30 @@ if (Object.keys(result['open_all']) !== Object.keys(result['close_all'])) {
     }
   })
 }
+// キーの日付でソート
+const openAllSorted  = objectSortByKey(result['open_all'])
+const closeAllSorted = objectSortByKey(result['close_all'])
+
+const openKeys  = Object.keys(openAllSorted)
+const closeKeys = Object.keys(closeAllSorted)
+
+// 累積のカウントも計算
+const openAllCumulate = {}
+let current = 0
+openKeys.forEach((key) => {
+  current += openAllSorted[key]
+  openAllCumulate[key] = current
+}, 0)
+const closeAllCumulate = {}
+current = 0
+closeKeys.forEach((key) => {
+  current += closeAllSorted[key]
+  closeAllCumulate[key] = current
+}, 0)
+result[`open_all_cumulate`] = openAllCumulate
+result[`close_all_cumulate`] = closeAllCumulate
 
 // 作図用パラメータ準備
-const openKeys  = Object.keys(result['open_all'])
-const closeKeys = Object.keys(result['close_all'])
 result['all_chart'] = {
   labels: openKeys,
   datasets: [
@@ -112,8 +130,43 @@ closeKeys.forEach(key => {
   (result['all_chart']['datasets'][1].data as Array<number>).push(result['close_all'][key])
 })
 
-// console.log('result',  result)
-// console.log('result1',  result['all_chart']['datasets'][0])
-// console.log('result2',  result['all_chart']['datasets'][1])
+result['all_chart_cumulate'] = {
+  labels: openKeys,
+  datasets: [
+    {
+      label: 'open',
+      lineTension: 0,
+      borderColor: '#f87979',
+      fill: false,
+      data: [  ]
+    },
+    {
+      label: 'closed',
+      lineTension: 0,
+      borderColor: '#0067c0',
+      fill: false,
+      data: [  ]
+    }
+  ]
+}
+openKeys.forEach(key => {
+  (result['all_chart_cumulate']['datasets'][0].data as Array<number>).push(result['open_all_cumulate'][key])
+})
+closeKeys.forEach(key => {
+  (result['all_chart_cumulate']['datasets'][1].data as Array<number>).push(result['close_all_cumulate'][key])
+})
+
 const resultJson = JSON.stringify(result)
 fs.writeFileSync(`${__dirname}/../output/result.json`, resultJson)
+
+function objectSortByKey(object: any) {
+  const sorted = {};
+  const keyArray  = Object.keys(object)
+  keyArray.sort();
+
+  keyArray.forEach(key => {
+    sorted[key] = object[key];
+  })
+
+  return sorted;
+}

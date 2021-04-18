@@ -5,7 +5,7 @@
         <line-chart :chart-data="datacollection" :options="options"></line-chart>
       </div>
       <div class="small">
-        <bar-chart :chart-data="datacollection2" :options="options2"></bar-chart>
+        <line-chart :chart-data="datacollection2" :options="options"></line-chart>
       </div>
       <v-card>
         <v-card-title class="headline">
@@ -89,11 +89,7 @@ import BarChart from '../plugins/BarChart'
 import * as util from 'util';
 const fs = require('fs');
 const config = require('../batch/config')
-
-// import * as fs from 'fs';
-// const readFile = util.promisify(fs.readFile);
 import * as result from '../batch/output/result.json';
-// import { readCsvDataSync } from '../store/csvData';
 
 export default Vue.extend({
   mounted () {
@@ -161,6 +157,8 @@ export default Vue.extend({
     fillData2 () {
       const data = (result as any)['all_chart']
       this.datacollection = data
+      const data2 = (result as any)['all_chart_cumulate']
+      this.datacollection2 = data2
     },
     getRandomInt () {
       return Math.floor(Math.random() * (50 - 5 + 1)) + 5
