@@ -1,11 +1,17 @@
 <template>
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
-      <div class="small">
-        <line-chart :chart-data="datacollection" :options="options"></line-chart>
+      <div class="issue-line-chart">
+        <line-chart
+          :chart-data="datacollection"
+          :options="options"
+        ></line-chart>
       </div>
       <div class="small">
-        <line-chart :chart-data="datacollection2" :options="options"></line-chart>
+        <line-chart
+          :chart-data="datacollection2"
+          :options="options"
+        ></line-chart>
       </div>
       <v-card>
         <v-card-title class="headline">
@@ -83,18 +89,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue from 'vue'
 import LineChart from '../plugins/LineChart'
-import BarChart from '../plugins/BarChart'
-import * as util from 'util';
-const fs = require('fs');
-const config = require('../batch/config')
-import * as result from '../batch/output/result.json';
+import * as result from '../batch/output/result.json'
 
 export default Vue.extend({
-  mounted () {
-    this.fillData()
-    this.fillData2()
+  components: {
+    LineChart,
   },
   data() {
     return {
@@ -104,44 +105,59 @@ export default Vue.extend({
       datacollection2: {},
       options: {
         scales: {
-            xAxes: [{
-                type: 'time',
-                time: {
-                    unit: 'day'
-                }
-            }]
-        }
+          xAxes: [
+            {
+              type: 'time',
+              time: {
+                unit: 'day',
+              },
+            },
+          ],
+          yAxes: [
+            {
+              ticks: {
+                stepSize: 1.0,
+              },
+            },
+          ],
+        },
       },
       options2: {
         scales: {
-          yAxes: [{
+          yAxes: [
+            {
               ticks: {
-                  suggestedMin: 50,
-                  suggestedMax: 100
-              }
-          }]
-        }
-      }
+                suggestedMin: 50,
+                suggestedMax: 100,
+              },
+            },
+          ],
+        },
+      },
     }
   },
+  mounted() {
+    this.fillData()
+    this.fillData2()
+  },
   methods: {
-    fillData () {
+    fillData() {
       this.datacollection = {
-        labels: [ "2015-03-15",  "2015-03-17",  "2015-03-20" ],
+        labels: ['2015-03-15', '2015-03-17', '2015-03-20'],
         datasets: [
           {
             label: 'Data One',
             lineTension: 0,
             backgroundColor: '#f87979',
-            data: [ this.getRandomInt(), 10, 40 ]
+            data: [this.getRandomInt(), 10, 40],
           },
           {
             label: 'Data two',
             lineTension: 0,
             backgroundColor: '#f82970',
-            data: [ this.getRandomInt(), 20, 60 ]
-          }
-        ]
+            data: [this.getRandomInt(), 20, 60],
+          },
+        ],
       }
       this.datacollection2 = {
         labels: ['January', 'February'],
@@ -149,24 +165,25 @@ export default Vue.extend({
           {
             label: 'Data One',
             backgroundColor: '#f87979',
-            data: [40, 20]
-          }
-        ]
+            data: [40, 20],
+          },
+        ],
       }
     },
-    fillData2 () {
-      const data = (result as any)['all_chart']
+    fillData2() {
+      const data = (result as any).allChart
       this.datacollection = data
-      const data2 = (result as any)['all_chart_cumulate']
+      const data2 = (result as any).allChartCumulate
       this.datacollection2 = data2
     },
-    getRandomInt () {
+    getRandomInt() {
       return Math.floor(Math.random() * (50 - 5 + 1)) + 5
     },
-  }, 
-  components: {
-    LineChart,
-    BarChart
-  }
+  },
 })
 </script>
+
+<style>
+.issue-line-chart {
+}
+</style>

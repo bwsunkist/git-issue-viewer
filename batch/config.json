@@ -1,7 +1,7 @@
 {
     "USE_GITLAB": true,
     "ACCESS_TOKEN": "yourToken",
-    "BASE_URL": "https://github.com",
+    "GITLAB_BASE_URL": "https://github.com",
     "REPO_URL": [
         "yourOrganization/yourProject"
     ],

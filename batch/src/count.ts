@@ -1,28 +1,41 @@
 import * as fs from 'fs'
 const config = require('../config')
 
-const pjArray: Array<string> = config.PROJ_ID;
-const tagArray: Array<string> = config.COUNT_TAGS;
+const pjArray: Array<string> = config.PROJ_ID
+const tagArray: Array<string> = config.COUNT_TAGS
 
-const result = {}
+type resultJsonFormat = {
+  openAll?: {}
+  closeAll?: {}
+  openAllCumulate?: {}
+  closeAllCumulate?: {}
+  allChart?: {
+    labels: {}
+    datasets: any
+  }
+  allChartCumulate?: {
+    labels: {}
+    datasets: any
+  }
+}
+
+const result: resultJsonFormat = {}
 
 const allDateOpenIssues = {}
 const allDateCloseIssues = {}
 
-pjArray.forEach(pjId => {
-  tagArray.forEach(tag => {
+pjArray.forEach((pjId) => {
+  tagArray.forEach((tag) => {
     try {
       const repoName = `${pjId}_${tag}.json`
-      const csvData = fs.readFileSync(`${__dirname}/../output/${repoName}`, 'utf-8')
+      const csvData = fs.readFileSync(
+        `${__dirname}/../output/${repoName}`,
+        'utf-8'
+      )
       const data = JSON.parse(csvData)
-      console.log('tag:', tag)
-      console.log('issuesNum:', data.issuesArr.length)
-
-      let opendIssueCount = 0
-      let closedIssueCount = 0
       const eachDateOpenIssues = {}
       const eachDateCloseIssues = {}
-      data.issuesArr.forEach(issue => {
+      data.issuesArr.forEach((issue) => {
         const openDate = new Date(issue.created_at)
         if (eachDateOpenIssues[openDate.toISOString().slice(0, 10)]) {
           eachDateOpenIssues[openDate.toISOString().slice(0, 10)] += 1
@@ -50,41 +63,38 @@ pjArray.forEach(pjId => {
             allDateCloseIssues[closeDate.toISOString().slice(0, 10)] = 1
           }
         }
-      });
-      // console.log('open',  eachDateOpenIssues)
-      // console.log('close', eachDateCloseIssues)
-      result[`open_${tag}`]   = eachDateOpenIssues
+      })
+      result[`open_${tag}`] = eachDateOpenIssues
       result[`close_${tag}`] = eachDateCloseIssues
     } catch (error) {
-      console.log('read csv file error');
-      console.log(error);
-    }
-  });
-});
-
-result[`open_all`]   = allDateOpenIssues
-result[`close_all`] = allDateCloseIssues
-
-// 片方にだけ存在する日付がないように０埋め
-if (Object.keys(result['open_all']) !== Object.keys(result['close_all'])) {
-  const openKeys  = Object.keys(result['open_all'])
-  const closeKeys = Object.keys(result['close_all'])
-  openKeys.forEach(key => {
-    if (!result['close_all'][key]) {
-      result['close_all'][key] = 0
+      console.log(error)
     }
   })
-  closeKeys.forEach(key => {
-    if (!result['open_all'][key]) {
-      result['open_all'][key] = 0
+})
+
+result.openAll = allDateOpenIssues
+result.closeAll = allDateCloseIssues
+
+// 片方にだけ存在する日付がないように０埋め
+if (Object.keys(result.openAll) !== Object.keys(result.closeAll)) {
+  const openKeys = Object.keys(result.openAll)
+  const closeKeys = Object.keys(result.closeAll)
+  openKeys.forEach((key) => {
+    if (!result.closeAll[key]) {
+      result.closeAll[key] = 0
+    }
+  })
+  closeKeys.forEach((key) => {
+    if (!result.openAll[key]) {
+      result.openAll[key] = 0
     }
   })
 }
 // キーの日付でソート
-const openAllSorted  = objectSortByKey(result['open_all'])
-const closeAllSorted = objectSortByKey(result['close_all'])
+const openAllSorted = objectSortByKey(result.openAll)
+const closeAllSorted = objectSortByKey(result.closeAll)
 
-const openKeys  = Object.keys(openAllSorted)
+const openKeys = Object.keys(openAllSorted)
 const closeKeys = Object.keys(closeAllSorted)
 
 // 累積のカウントも計算
@@ -100,11 +110,11 @@ closeKeys.forEach((key) => {
   current += closeAllSorted[key]
   closeAllCumulate[key] = current
 }, 0)
-result[`open_all_cumulate`] = openAllCumulate
-result[`close_all_cumulate`] = closeAllCumulate
+result.openAllCumulate = openAllCumulate
+result.closeAllCumulate = closeAllCumulate
 
 // 作図用パラメータ準備
-result['all_chart'] = {
+result.allChart = {
   labels: openKeys,
   datasets: [
     {
@@ -112,25 +122,27 @@ result['all_chart'] = {
       lineTension: 0,
       borderColor: '#f87979',
       fill: false,
-      data: [  ]
+      data: [],
     },
     {
       label: 'closed',
       lineTension: 0,
       borderColor: '#0067c0',
       fill: false,
-      data: [  ]
-    }
-  ]
+      data: [],
+    },
+  ],
 }
-openKeys.forEach(key => {
-  (result['all_chart']['datasets'][0].data as Array<number>).push(result['open_all'][key])
+openKeys.forEach((key) => {
+  ;(result.allChart.datasets[0].data as Array<number>).push(result.openAll[key])
 })
-closeKeys.forEach(key => {
-  (result['all_chart']['datasets'][1].data as Array<number>).push(result['close_all'][key])
+closeKeys.forEach((key) => {
+  ;(result.allChart.datasets[1].data as Array<number>).push(
+    result.closeAll[key]
+  )
 })
 
-result['all_chart_cumulate'] = {
+result.allChartCumulate = {
   labels: openKeys,
   datasets: [
     {
@@ -138,35 +150,39 @@ result['all_chart_cumulate'] = {
       lineTension: 0,
       borderColor: '#f87979',
       fill: false,
-      data: [  ]
+      data: [],
     },
     {
       label: 'closed',
       lineTension: 0,
       borderColor: '#0067c0',
       fill: false,
-      data: [  ]
-    }
-  ]
+      data: [],
+    },
+  ],
 }
-openKeys.forEach(key => {
-  (result['all_chart_cumulate']['datasets'][0].data as Array<number>).push(result['open_all_cumulate'][key])
+openKeys.forEach((key) => {
+  ;(result.allChartCumulate.datasets[0].data as Array<number>).push(
+    result.openAllCumulate[key]
+  )
 })
-closeKeys.forEach(key => {
-  (result['all_chart_cumulate']['datasets'][1].data as Array<number>).push(result['close_all_cumulate'][key])
+closeKeys.forEach((key) => {
+  ;(result.allChartCumulate.datasets[1].data as Array<number>).push(
+    result.closeAllCumulate[key]
+  )
 })
 
 const resultJson = JSON.stringify(result)
 fs.writeFileSync(`${__dirname}/../output/result.json`, resultJson)
 
 function objectSortByKey(object: any) {
-  const sorted = {};
-  const keyArray  = Object.keys(object)
-  keyArray.sort();
+  const sorted = {}
+  const keyArray = Object.keys(object)
+  keyArray.sort()
 
-  keyArray.forEach(key => {
-    sorted[key] = object[key];
+  keyArray.forEach((key) => {
+    sorted[key] = object[key]
   })
 
-  return sorted;
+  return sorted
 }

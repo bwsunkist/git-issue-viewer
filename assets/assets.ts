@@ -1,2 +1,2 @@
-import sample from './sample.json';
+import sample from './sample.json'
 export const sampleValue = sample

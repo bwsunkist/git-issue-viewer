@@ -2,13 +2,15 @@
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
       <div class="small">
-        <line-chart :chart-data="datacollection"></line-chart>
+        <horizontal-bar-chart
+          :chart-data="barGraphCollecion"
+          :options="options"
+        ></horizontal-bar-chart>
+        open issueを含むラベルを表示しています。
         <button @click="fillData()">Randomize</button>
       </div>
       <v-card>
-        <v-card-title class="headline">
-          {{ selectedPjName }}
-        </v-card-title>
+        <v-card-title class="headline"> git-issue-viewer </v-card-title>
         <v-card-text>
           <p>
             Vuetify is a progressive Material Design component framework for
@@ -81,73 +83,88 @@
 </template>
 
 <script lang="ts">
-import Logo from '~/components/Logo.vue'
-import VuetifyLogo from '~/components/VuetifyLogo.vue'
-import Vue from 'vue';
-import { sampleValue } from '../assets/assets';
-import LineChart from '../plugins/LineChart'
+import Vue from 'vue'
+import HorizontalBarChart from '../plugins/HorizontalBarChart'
+import { gitlabStore } from '~/store'
 
 export default Vue.extend({
-  mounted () {
-      this.fillData()
+  components: {
+    HorizontalBarChart,
+  },
+  async asyncData() {
+    try {
+      await gitlabStore.fetchLabelList(4)
+      const barData = gitlabStore.getLabelData
+
+      const barGraphCollecion = {
+        labels: barData.labels,
+        datasets: [
+          {
+            label: 'open',
+            lineTension: 0,
+            backgroundColor: '#f87979',
+            data: barData.open,
+          },
+          // {
+          //   label: 'close',
+          //   type: 'line',
+          //   lineTension: 0,
+          //   backgroundColor: '#0067c0',
+          //   data: barData.close,
+          // },
+        ],
+      }
+      return { barGraphCollecion }
+    } catch (e) {
+      console.log(e)
+    }
   },
   data() {
     return {
       title: 'aaaaa',
       selectedPjName: 'aaaaabbb',
-      datacollection: {
-        labels: [ 1, 2],
-        datasets: [
-          {
-            label: 'Data One',
-            backgroundColor: '#f87979',
-            data: [3, 4]
-          },
-          {
-            label: 'Data One',
-            backgroundColor: '#f87979',
-            data: [5, 6]
-          }
-        ]
+      barGraphCollecion: {},
+      options: {
+        indexAxis: 'y',
+        // scales: {
+        //   xAxes: [
+        //     {
+        //       stacked: true,
+        //     },
+        //   ],
+        //   yAxes: [
+        //     {
+        //       stacked: true,
+        //     },
+        //   ],
+        // },
       },
-      options2: {
-        scales: {
-          yAxes: [{
-              ticks: {
-                  suggestedMin: 50,
-                  suggestedMax: 100
-              }
-          }]
-        }
-      }
     }
   },
+  mounted() {
+    this.fillData()
+  },
   methods: {
-    fillData () {
+    fillData() {
       this.datacollection = {
         labels: [this.getRandomInt(), this.getRandomInt()],
         datasets: [
           {
             label: 'Data One',
             backgroundColor: '#f87979',
-            data: [this.getRandomInt(), this.getRandomInt()]
+            data: [this.getRandomInt(), this.getRandomInt()],
           },
           {
             label: 'Data two',
             backgroundColor: '#f87979',
-            data: [this.getRandomInt(), this.getRandomInt()]
-          }
-        ]
+            data: [this.getRandomInt(), this.getRandomInt()],
+          },
+        ],
       }
     },
-    getRandomInt () {
+    getRandomInt() {
       return Math.floor(Math.random() * (50 - 5 + 1)) + 5
-    }
-  }, 
-  components: {
-    Logo,
-    VuetifyLogo,
-    LineChart
-  }
+    },
+  },
 })
 </script>
