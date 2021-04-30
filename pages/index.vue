@@ -1,101 +1,60 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <div class="small">
-        <horizontal-bar-chart
-          :chart-data="barGraphCollecion"
-          :options="options"
-        ></horizontal-bar-chart>
-        open issueを含むラベルを表示しています。
-        <button @click="fillData()">Randomize</button>
-      </div>
-      <v-card>
-        <v-card-title class="headline"> git-issue-viewer </v-card-title>
-        <v-card-text>
-          <p>
-            Vuetify is a progressive Material Design component framework for
-            Vue.js. It was designed to empower developers to create amazing
-            applications.
-          </p>
-          <p>
-            For more information on Vuetify, check out the
-            <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              documentation </a
-            >.
-          </p>
-          <p>
-            If you have questions, please join the official
-            <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
-            >
-              discord </a
-            >.
-          </p>
-          <p>
-            Find a bug? Report it on the github
-            <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board </a
-            >.
-          </p>
-          <p>
-            Thank you for developing with Vuetify and I look forward to bringing
-            more exciting features in the future.
-          </p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3" />
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt Documentation
-          </a>
-          <br />
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" nuxt to="/inspire"> Continue </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
+  <v-container>
+    <v-row>
+      <v-col cols="12" sm="8">
+        <v-sheet min-height="70vh" rounded="lg">
+          <label-bar-chart :data="barGraphCollecion"> </label-bar-chart>
+        </v-sheet>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-sheet rounded="lg" min-height="30" class="grey lighten-3">
+          <v-card style="position: fixed">
+            <v-card-title class="headline"> {{ title }} </v-card-title>
+            <v-card-text>
+              <p v-if="title === initialTitle">
+                Click bar in glaph, then detailed data of the label will be
+                indicated here.
+              </p>
+              <a
+                href="https://nuxtjs.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Nuxt Documentation
+              </a>
+              <br />
+              <a
+                href="https://github.com/nuxt/nuxt.js"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Nuxt GitHub
+              </a>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn color="primary" nuxt to="/inspire"> Continue </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-sheet>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import HorizontalBarChart from '../plugins/HorizontalBarChart'
+import LabelBarChart from '../components/LabelBarChart.vue'
 import { gitlabStore } from '~/store'
 
 export default Vue.extend({
   components: {
-    HorizontalBarChart,
+    LabelBarChart,
   },
   async asyncData() {
     try {
-      await gitlabStore.fetchLabelList(4)
+      await gitlabStore.readLabelList()
       const barData = gitlabStore.getLabelData
-
       const barGraphCollecion = {
         labels: barData.labels,
         datasets: [
@@ -121,7 +80,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      title: 'aaaaa',
+      initialTitle: 'git-issue-viewer',
+      title: 'git-issue-viewer',
       selectedPjName: 'aaaaabbb',
       barGraphCollecion: {},
       options: {
@@ -164,6 +124,26 @@ export default Vue.extend({
     },
     getRandomInt() {
       return Math.floor(Math.random() * (50 - 5 + 1)) + 5
+    },
+    async readLabalData() {
+      try {
+        await gitlabStore.fetchLabelList(4)
+        const barData = gitlabStore.getLabelData
+        const barGraphCollecion = {
+          labels: barData.labels,
+          datasets: [
+            {
+              label: 'open',
+              lineTension: 0,
+              backgroundColor: '#f87979',
+              data: barData.open,
+            },
+          ],
+        }
+        return { barGraphCollecion }
+      } catch (e) {
+        console.log(e)
+      }
     },
   },
 })

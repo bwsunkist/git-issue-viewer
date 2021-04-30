@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators'
 import * as config from '../batch/config.json'
-import { axiosGitlab } from '~/utils/api'
+import { fetchLabelListForTargetPj } from '~/batch/src/fetchLabelList'
 
 type LabelData = {
   labels: string[]
@@ -43,6 +43,25 @@ export default class Gitlab extends VuexModule {
   }
 
   /**
+   * バッチで取得し保存したJSONからラベル情報を取得します.
+   */
+  @Action({ rawError: true })
+  public readLabelList() {
+    const pjArray: Array<number> = config.PROJ_ID
+    const pjId = pjArray[0]
+    const repoName = `${pjId}_labels.json`
+    try {
+      const data = require(`../batch/output/${repoName}`)
+      const json = data
+      if (!json) return
+
+      this.setLabelData(json)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  /**
    * API経由でラベル情報を取得します.
    * 数が多いと時間がかかるのでmaxPageを適切に設定すること.
    * @param maxPage 最大取得ページ数
@@ -50,32 +69,8 @@ export default class Gitlab extends VuexModule {
   @Action({ rawError: true })
   public async fetchLabelList(maxPage?: number) {
     const pjArray: Array<number> = config.PROJ_ID
-    let labelsResult = []
-    await Promise.all(
-      pjArray.map(async (pjId) => {
-        let tmpResult = []
-        let pageNum = '1'
-        while (tmpResult) {
-          const getParam = {
-            params: {
-              with_counts: true,
-              per_page: 50,
-              page: pageNum,
-            },
-          }
-          const result = await axiosGitlab.get(`/${pjId}/labels`, getParam)
-          tmpResult = result.data
-          labelsResult = labelsResult.concat(tmpResult)
-          if (
-            result.headers['x-next-page'] === '' ||
-            result.headers['x-page'] === String(maxPage)
-          ) {
-            break
-          }
-          pageNum = result.headers['x-next-page']
-        }
-      })
-    )
-    this.setLabelData(labelsResult)
+    const pjId = pjArray[0]
+    const labelList = await fetchLabelListForTargetPj(String(pjId), maxPage)
+    this.setLabelData(labelList)
   }
 }

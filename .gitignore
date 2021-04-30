@@ -2,6 +2,7 @@
 node_modules/
 dist/
 batch/lib
+batch/output
 myconfig.json
 
 # --- Nuxt --- 

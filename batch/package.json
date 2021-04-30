@@ -4,8 +4,9 @@
   "description": "指定した gitlab リポジトリのissue状況を可視化します。",
   "main": "index.js",
   "scripts": {
-    "batch": "tsc && node ./lib/getDataBatch.js",
-    "count": "tsc && node ./lib/count.js"
+    "batch:issues": "tsc && node ./lib/getDataBatch.js",
+    "count": "tsc && node ./lib/count.js",
+    "batch:labels": "tsc && node ./lib/fetchLabelListBatch.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,6 @@
     "axios": "^0.21.1"
   },
   "devDependencies": {
-    "@types/node": "^14.14.20"
+    "@types/node": "^14.14.43"
   }
 }
